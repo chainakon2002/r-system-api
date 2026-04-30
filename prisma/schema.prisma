@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Employee {
+  id         String       @id @default(uuid()) @db.Uuid
+  prefix     String // นาย, นาง, นางสาว
+  firstName  String
+  lastName   String
+  nickname   String?
+  email      String       @unique
+  role       String       @default("STAFF") // ADMIN, MANAGER, STAFF
+  department String?
+  salary     Float?
+  status     String       @default("ACTIVE") // ACTIVE, INACTIVE
+  attendance Attendance[]
+}
+
+model Attendance {
+  id         String    @id @default(uuid()) @db.Uuid
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId String    @db.Uuid
+  checkIn    DateTime?
+  checkOut   DateTime?
+  date       DateTime  @db.Date
+  status     String // มาตรงเวลา, สาย, ขาดงาน
+}
+
+model AuthLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  action    String
+  ipAddress String?
+  timestamp DateTime @default(now())
+}
