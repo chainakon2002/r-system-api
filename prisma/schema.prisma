@@ -7,17 +7,18 @@ datasource db {
 }
 
 model Employee {
-  id         String       @id @default(uuid()) @db.Uuid
-  prefix     String // นาย, นาง, นางสาว
-  firstName  String
-  lastName   String
-  nickname   String?
-  email      String       @unique
-  role       String       @default("STAFF") // ADMIN, MANAGER, STAFF
-  department String?
-  salary     Float?
-  status     String       @default("ACTIVE") // ACTIVE, INACTIVE
-  attendance Attendance[]
+  id           String         @id @default(uuid()) @db.Uuid
+  prefix       String // นาย, นาง, นางสาว
+  firstName    String
+  lastName     String
+  nickname     String?
+  email        String         @unique
+  role         String         @default("STAFF") // ADMIN, MANAGER, STAFF
+  department   String?
+  salary       Float?
+  status       String         @default("ACTIVE") // ACTIVE, INACTIVE
+  attendance   Attendance[]
+  leaveRequests LeaveRequest[]
 }
 
 model Attendance {
@@ -28,6 +29,19 @@ model Attendance {
   checkOut   DateTime?
   date       DateTime  @db.Date
   status     String // มาตรงเวลา, สาย, ขาดงาน
+}
+
+model LeaveRequest {
+  id         String   @id @default(uuid()) @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String   @db.Uuid
+  type       String   // ลากิจ, ลาป่วย, ลาพักร้อน
+  startDate  DateTime @db.Date
+  endDate    DateTime @db.Date
+  reason     String
+  status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model AuthLog {

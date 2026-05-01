@@ -1,8 +1,7 @@
-import { Request, Response } from 'express';
-import supabase from '../config/supabase';
-import prisma from '../config/prisma';
+import supabase from '../config/supabase.js';
+import prisma from '../config/prisma.js';
 
-export const createEmployee = async (req: Request, res: Response): Promise<any> => {
+export const createEmployee = async (req, res) => {
   try {
     const { 
       prefix, firstName, lastName, nickname, 
@@ -56,5 +55,20 @@ export const createEmployee = async (req: Request, res: Response): Promise<any> 
   } catch (error) {
     console.error('Create Employee Error:', error);
     return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง' });
+  }
+};
+
+export const getEmployees = async (req, res) => {
+  try {
+    const employees = await prisma.employee.findMany({
+      orderBy: {
+        firstName: 'asc'
+      }
+    });
+    
+    return res.json(employees);
+  } catch (error) {
+    console.error('Get Employees Error:', error);
+    return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลพนักงาน' });
   }
 };

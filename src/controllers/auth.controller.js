@@ -1,8 +1,7 @@
-import { Request, Response } from 'express';
-import supabase from '../config/supabase';
-import prisma from '../config/prisma';
+import supabase from '../config/supabase.js';
+import prisma from '../config/prisma.js';
 
-export const login = async (req: Request, res: Response): Promise<any> => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
