@@ -72,3 +72,54 @@ export const getEmployees = async (req, res) => {
     return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลพนักงาน' });
   }
 };
+
+export const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { prefix, firstName, lastName, nickname, role, department, salary, status } = req.body;
+
+    const updatedEmployee = await prisma.employee.update({
+      where: { id },
+      data: {
+        prefix,
+        firstName,
+        lastName,
+        nickname,
+        role,
+        department,
+        salary: salary ? parseFloat(salary) : null,
+        status
+      }
+    });
+
+    return res.json({ message: 'อัปเดตข้อมูลสำเร็จ', employee: updatedEmployee });
+  } catch (error) {
+    console.error('Update Employee Error:', error);
+    return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัปเดตพนักงาน' });
+  }
+};
+
+export const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Delete from Supabase Auth
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) {
+      console.error('Supabase Auth Delete Error:', authError);
+      // Continue anyway, as it might already be deleted or not found
+    }
+
+    // 2. Delete related records and Employee using a transaction
+    await prisma.$transaction([
+      prisma.attendance.deleteMany({ where: { employeeId: id } }),
+      prisma.leaveRequest.deleteMany({ where: { employeeId: id } }),
+      prisma.employee.delete({ where: { id } })
+    ]);
+
+    return res.json({ message: 'ลบพนักงานสำเร็จ' });
+  } catch (error) {
+    console.error('Delete Employee Error:', error);
+    return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการลบพนักงาน' });
+  }
+};
